@@ -1,0 +1,115 @@
+import java.util.*;
+
+public class Main {
+    static Scanner sc = new Scanner(System.in);
+    static String boundary = "---------";
+    static int userCoordsX;
+    static int userCoordsY;
+    static int squaresPlayed = 0;
+    static char[][] gameboard = new char[3][3];
+    static boolean gameFinished = false;
+    static boolean validInput = false;
+
+    public static void main(String[] args) {
+        startGame();
+        playerMove();
+    }
+
+    public static void playerMove() {
+
+        while (!gameFinished) {
+            try {
+                userCoordsX = sc.nextInt() - 1;
+                userCoordsY = sc.nextInt() - 1;
+
+                if (userCoordsX < 0 || userCoordsX > 2 || userCoordsY < 0 || userCoordsY > 2) {
+                    System.out.println("Coordinates should be from 1 to 3!");
+                    continue;
+                }
+
+                if (gameboard[userCoordsX][userCoordsY] != ' ') {
+                    System.out.println("This cell is occupied! Choose another one!");
+                    continue;
+                }
+
+            } catch (InputMismatchException e) {
+                System.out.println("You should enter numbers!");
+                sc.nextLine(); // required to clear the invalid input. just how scanner works.
+            } catch (ArrayIndexOutOfBoundsException e) {
+                System.out.println("Coordinates should be from 1 to 3!");
+            }
+
+            squaresPlayed++;
+
+            if (squaresPlayed % 2 == 0) {
+                gameboard[userCoordsX][userCoordsY] = 'X';
+            } else {
+                gameboard[userCoordsX][userCoordsY] = 'O';
+            }
+
+            printGameboard();
+
+            if (squaresPlayed > 4) {
+                determineWinner();
+            }
+        }
+    }
+
+    public static void startGame() {
+
+        System.out.println(boundary + "\n|       |\n|       |\n|       |\n" + boundary);
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                gameboard[i][j] = ' ';
+            }
+        }
+    }
+
+    public static void printGameboard() {
+        System.out.println(boundary);
+
+        for (int i = 0; i < 3; i++) {
+            System.out.print("| ");
+            for (int j = 0; j < 3; j++) {
+                System.out.print(gameboard[i][j] + " ");
+            }
+            System.out.print("|");
+            System.out.println();
+        }
+
+        System.out.println(boundary);
+    }
+
+    public static void determineWinner() {
+        boolean xWins = false;
+        boolean oWins = false;
+
+        for (int i = 0; i < 3; i++) {
+            if (gameboard[i][0] == 'X' && gameboard[i][1] == 'X' && gameboard[i][2] == 'X' ||
+                    gameboard[0][i] == 'X' && gameboard[1][i] == 'X' && gameboard[2][i] == 'X' ||
+                    gameboard[0][0] == 'X' && gameboard[1][1] == 'X' && gameboard[2][2] == 'X' ||
+                    gameboard[0][2] == 'X' && gameboard[1][1] == 'X' && gameboard[2][0] == 'X') {
+                xWins = true;
+            }
+
+            if (gameboard[i][0] == 'O' && gameboard[i][1] == 'O' && gameboard[i][2] == 'O' ||
+                    gameboard[0][i] == 'O' && gameboard[1][i] == 'O' && gameboard[2][i] == 'O' ||
+                    gameboard[0][0] == 'O' && gameboard[1][1] == 'O' && gameboard[2][2] == 'O' ||
+                    gameboard[0][2] == 'O' && gameboard[1][1] == 'O' && gameboard[2][0] == 'O') {
+                oWins = true;
+            }
+        }
+
+        if (xWins) {
+            System.out.println("X wins");
+            gameFinished = true;
+        } else if (oWins) {
+            System.out.println("O wins");
+            gameFinished = true;
+        } else if (squaresPlayed == 9) {
+            System.out.println("Draw");
+            gameFinished = true;
+        }
+    }
+}
