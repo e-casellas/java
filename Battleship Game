@@ -1,0 +1,355 @@
+package battleship;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        char[][] playerOneField = initializeGameField();
+        char[][] playerTwoField = initializeGameField();
+
+        // Define ship names and sizes
+        String[] shipNames = {"Aircraft Carrier", "Battleship", "Submarine", "Cruiser", "Destroyer"};
+        int[] shipSizes = {5, 4, 3, 3, 2};
+
+        // Display the initial game field
+        System.out.println("Player 1, place your ships on the game field");
+        displayGameField(playerTwoField, false);
+
+        // Player one places the ships on the game field
+        for (int i = 0; i < shipNames.length; i++) {
+            String shipName = shipNames[i];
+            int shipSize = shipSizes[i];
+
+            System.out.println("\nEnter the coordinates of the " + shipName + " (" + shipSize + " cells):\n");
+
+            // Input ship coordinates and place the ship
+            placeShip(playerOneField, shipSize, shipName);
+
+            // Display the game field with the placed ship
+            displayGameField(playerOneField, false);
+        }
+
+        System.out.println("\nPress Enter and pass the move to another player\n");
+        scanner.nextLine();
+
+        // Display the initial game field
+        System.out.println("Player 2, place your ships on the game field");
+        displayGameField(playerTwoField, false);
+
+        // Player one places the ships on the game field
+        for (int i = 0; i < shipNames.length; i++) {
+            String shipName = shipNames[i];
+            int shipSize = shipSizes[i];
+
+            System.out.println("\nEnter the coordinates of the " + shipName + " (" + shipSize + " cells):\n");
+
+            // Input ship coordinates and place the ship
+            placeShip(playerTwoField, shipSize, shipName);
+
+            // Display the game field with the placed ship
+            displayGameField(playerTwoField, false);
+        }
+
+        System.out.println("\nPress Enter and pass the move to another player\n");
+        scanner.nextLine();
+
+        // Game start
+        gameStart(playerOneField, playerTwoField);
+    }
+
+    private static char[][] initializeGameField() {
+        char[][] field = new char[10][10];
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                field[i][j] = '~'; // Initialize with fog of war symbol
+            }
+        }
+        return field;
+    }
+
+    private static void displayGameField(char[][] field, boolean fogOfWar) {
+        System.out.println(); // Print empty line
+        System.out.println("  1 2 3 4 5 6 7 8 9 10");
+        char rowLabel = 'A';
+        if (!fogOfWar) {
+            for (int i = 0; i < 10; i++) {
+                System.out.print(rowLabel + " ");
+                rowLabel++;
+                for (int j = 0; j < 10; j++) {
+                    System.out.print(field[i][j] + " ");
+//                    if (field[i][j] == 'M' || field[i][j] == 'X') {
+//                        System.out.print("~ ");
+//                    } else {
+//                        System.out.print(field[i][j] + " ");
+//                    }
+                }
+                System.out.println();
+            }
+        } else {
+            for (int i = 0; i < 10; i++) {
+                System.out.print(rowLabel + " ");
+                rowLabel++;
+                for (int j = 0; j < 10; j++) {
+                    if (field[i][j] == 'M' || field[i][j] == 'X') {
+                        System.out.print(field[i][j] + " ");
+                    } else {
+                        System.out.print("~ ");
+                    }
+                }
+                System.out.println();
+            }
+        }
+
+    }
+
+    private static void placeShip(char[][] field, int shipSize, String shipName) {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            String input = scanner.nextLine().toUpperCase();
+
+            // Check for valid input format
+            if (input.matches("^[A-J]([1-9]|10) [A-J]([1-9]|10)$")) {
+                String[] coordinates = input.split(" ");
+                String startCoord = coordinates[0];
+                String endCoord = coordinates[1];
+
+                // Convert coordinates to row and column indices
+                int startRow = startCoord.charAt(0) - 'A';
+                int startCol = Integer.parseInt(startCoord.substring(1)) - 1;
+                int endRow = endCoord.charAt(0) - 'A';
+                int endCol = Integer.parseInt(endCoord.substring(1)) - 1;
+
+                // Check if the coordinates are within bounds
+                if (startRow < 0 || startRow >= 10 || startCol < 0 || startCol >= 10 ||
+                        endRow < 0 || endRow >= 10 || endCol < 0 || endCol >= 10) {
+                    System.out.println("\nError! Wrong ship location! Try again:\n");
+                } else if (startRow == startCol && endRow == endCol) { // THIS IS WRONG LOGIC
+                    System.out.println("\nError! Wrong ship location! Try again:\n");
+                } else if (Math.abs(endRow - startRow) + 1 != shipSize && Math.abs(endCol - startCol) + 1 != shipSize) {
+                    System.out.println("\nError! Wrong length of the " + shipName + "! Try again:\n");
+                } else if (!isValidPlacement(field, startRow, startCol, endRow, endCol, shipSize)) {
+                    System.out.println("\nError! You placed it too close to another one. Try again:\n");
+                } else {
+                    // Valid placement, place the ship on the field
+                    placeShipOnField(field, startRow, startCol, endRow, endCol);
+                    break;
+                }
+            } else {
+                System.out.println("\nError! Invalid input format. Try again:\n");
+            }
+        }
+    }
+
+    private static boolean isValidPlacement(char[][] field, int startRow, int startCol, int endRow, int endCol, int size) {
+        // Check if the coordinates are within bounds
+        if (startRow < 0 || startRow >= 10 || startCol < 0 || startCol >= 10 ||
+                endRow < 0 || endRow >= 10 || endCol < 0 || endCol >= 10) {
+            return false;
+        }
+
+        // Check if the ship size matches the distance between start and end coordinates
+        int rowDistance = Math.abs(endRow - startRow);
+        int colDistance = Math.abs(endCol - startCol);
+        if (rowDistance + 1 != size && colDistance + 1 != size) {
+            return false;
+        }
+
+        // Check if the ship is placed horizontally or vertically
+        if (startRow != endRow && startCol != endCol) {
+            return false;
+        }
+
+        // Check if there are any other ships in the specified positions
+        if (startRow == endRow) {
+            // Ship is placed horizontally
+            for (int j = Math.min(startCol, endCol); j <= Math.max(startCol, endCol); j++) {
+                if (field[startRow][j] == 'O') {
+                    return false;
+                }
+            }
+        } else {
+            // Ship is placed vertically
+            for (int i = Math.min(startRow, endRow); i <= Math.max(startRow, endRow); i++) {
+                if (field[i][startCol] == 'O') {
+                    return false;
+                }
+            }
+        }
+
+        for (int i = Math.min(startRow, endRow); i <= Math.max(startRow, endRow); i++) {
+            for (int j = Math.min(startCol, endCol); j <= Math.max(startCol, endCol); j++) {
+                if (field[i][j] == 'O') {
+                    return false;
+                }
+                // Check adjacent cells
+                for (int x = -1; x <= 1; x++) {
+                    for (int y = -1; y <= 1; y++) {
+                        int adjacentRow = i + x;
+                        int adjacentCol = j + y;
+                        if (adjacentRow >= 0 && adjacentRow < 10 && adjacentCol >= 0 && adjacentCol < 10 &&
+                                field[adjacentRow][adjacentCol] == 'O') {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static void placeShipOnField(char[][] field, int startRow, int startCol, int endRow, int endCol) {
+        // Place the ship on the field
+        for (int i = Math.min(startRow, endRow); i <= Math.max(startRow, endRow); i++) {
+            for (int j = Math.min(startCol, endCol); j <= Math.max(startCol, endCol); j++) {
+                field[i][j] = 'O';
+            }
+        }
+    }
+
+    private static void gameStart(char[][] fieldPlayerOne, char[][] fieldPlayerTwo) {
+        boolean playerOneTurn = true;
+        byte playerNumber = 1;
+        int turnNumber = 1;
+        char[][] field = new char[][]{};
+        int hitShipCells = 0;
+        int totalShipCells = 0;
+
+        Scanner scanner = new Scanner(System.in);
+
+        int hitShipCellsPlayerOne = 0; // Count the number of ship cells hit
+        int hitShipCellsPlayerTwo = 0; // Count the number of ship cells hit
+
+        while (hitShipCellsPlayerOne < 17 && hitShipCellsPlayerTwo < 17) {
+
+            if (playerOneTurn) {
+                field = fieldPlayerTwo;
+                hitShipCells = hitShipCellsPlayerOne;
+                displayGameField(fieldPlayerTwo, true);
+                System.out.print("---------------------");
+                displayGameField(fieldPlayerOne, false);
+                System.out.printf("\nPlayer %d, it's your turn:\n\n", playerNumber);
+            } else {
+                field = fieldPlayerOne;
+                hitShipCells = hitShipCellsPlayerTwo;
+                displayGameField(fieldPlayerOne, true);
+                System.out.print("---------------------");
+                displayGameField(fieldPlayerTwo, false);
+                System.out.printf("\nPlayer %d, it's your turn:\n\n", playerNumber);
+            }
+
+            String input = scanner.nextLine().toUpperCase();
+
+            // Check for valid input format
+            if (input.matches("^[A-J]([1-9]|10)$")) {
+
+                // Convert coordinates to row and column indices
+                int shotRow = input.charAt(0) - 'A';
+                int shotCol = Integer.parseInt(input.substring(1)) - 1;
+
+                // Check if the shot is within bounds
+                if (shotRow >= 0 && shotRow < 10 && shotCol >= 0 && shotCol < 10) {
+                    // Check if the shot hits a ship
+                    if (field[shotRow][shotCol] == 'X' || field[shotRow][shotCol] == 'O') {
+
+                        if (field[shotRow][shotCol] == 'O') {
+                            field[shotRow][shotCol] = 'X';
+                            //displayGameField(field, true);
+                            hitShipCells++;
+
+                            if (hitShipCells == 17) {
+                                System.out.println("\nYou sank the last ship. You won. Congratulations!");
+                                break; // Game over, all ships destroyed
+                            }
+
+                            // Check if the ship has been sunk
+                            if (isShipSunk(field, shotRow, shotCol)) {
+                                if (playerOneTurn) {
+                                    fieldPlayerTwo = field;
+                                    hitShipCellsPlayerOne = hitShipCells;
+                                    playerOneTurn = false;
+                                    playerNumber++;
+                                } else {
+                                    fieldPlayerOne = field;
+                                    hitShipCellsPlayerTwo = hitShipCells;
+                                    playerOneTurn = true;
+                                    playerNumber--;
+                                }
+                                System.out.println("\nYou sank a ship!\nPress Enter and pass the move to another player\n");
+                                scanner.nextLine();
+                                continue;
+                            }
+
+                            //continue;
+                        }
+
+                        //displayGameField(field, true);
+                        System.out.println("\nYou hit a ship!\nPress Enter and pass the move to another player\n");
+                        scanner.nextLine();
+
+                    } else {
+                        field[shotRow][shotCol] = 'M';
+                        //displayGameField(field, true);
+                        System.out.println("\nYou missed!\nPress Enter and pass the move to another player\n");
+                        scanner.nextLine();
+                    }
+                } else {
+                    System.out.println("\nError! You entered the wrong coordinates! Try again:\n");
+                }
+            } else {
+                System.out.println("\nError! You entered the wrong coordinates! Try again:\n");
+            }
+
+            if (playerOneTurn) {
+                fieldPlayerTwo = field;
+                hitShipCellsPlayerOne = hitShipCells;
+                playerOneTurn = false;
+                playerNumber++;
+            } else {
+                fieldPlayerOne = field;
+                hitShipCellsPlayerTwo = hitShipCells;
+                playerOneTurn = true;
+                playerNumber--;
+            }
+
+        }
+    }
+
+    private static boolean isShipSunk(char[][] field, int shotRow, int shotCol) {
+        char rowPlusOne;
+        char rowMinusOne;
+        char colPlusOne;
+        char colMinusOne;
+
+        try {
+            rowPlusOne = field[shotRow + 1][shotCol];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            rowPlusOne = field[shotRow][shotCol];
+        }
+
+        try {
+            rowMinusOne = field[shotRow - 1][shotCol];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            rowMinusOne = field[shotRow][shotCol];
+        }
+
+        try {
+            colPlusOne = field[shotRow][shotCol + 1];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            colPlusOne = field[shotRow][shotCol];
+        }
+
+        try {
+            colMinusOne = field[shotRow][shotCol - 1];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            colMinusOne = field[shotRow][shotCol];
+        }
+
+        if (rowPlusOne == 'O' || rowMinusOne == 'O' || colPlusOne == 'O' || colMinusOne == 'O') {
+            return false; // Ship letter still exists in field
+        } else {
+            return true; // No adjacent 'O' found, hence ship was destroyed
+        }
+    }
+}
