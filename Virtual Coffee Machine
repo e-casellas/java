@@ -1,0 +1,132 @@
+package machine;
+import java.util.Scanner;
+
+public class CoffeeMachine {
+    static Scanner sc = new Scanner(System.in);
+    private int cups;
+    private int water;
+    private int milk;
+    private int beans;
+    private int money;
+
+    public CoffeeMachine() {
+        this.cups = 0;
+        this.water = 0;
+        this.milk = 0;
+        this.beans = 0;
+        this.money = 0;
+    }
+
+    public CoffeeMachine(int cups, int water, int milk, int beans, int money) {
+        this.cups = cups;
+        this.water = water;
+        this.milk = milk;
+        this.beans = beans;
+        this.money = money;
+    }
+
+    public int getCups() {
+        return cups;
+    }
+
+    public void setCups(int cups) {
+        this.cups = cups;
+    }
+
+    public boolean substractCups(int cups) {
+        if (cups <= this.cups) {
+            this.cups -= cups;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void addCups(int cups) {
+        this.cups += cups;
+    }
+
+    public int getWater() {
+        return water;
+    }
+
+    public void setWater(int water) {
+        this.water = water;
+    }
+
+    public boolean substractWater(int water) {
+        if (water <= this.water) {
+            this.water -= water;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void addWater(int water) {
+        this.water += water;
+    }
+
+    public int getMilk() {
+        return milk;
+    }
+
+    public void setMilk(int milk) {
+        this.milk = milk;
+    }
+
+    public boolean substractMilk(int milk) {
+        if (milk <= this.milk) {
+            this.milk -= milk;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void addMilk(int milk) {
+        this.milk += milk;
+    }
+
+    public int getBeans() {
+        return beans;
+    }
+
+    public void setBeans(int beans) {
+        this.beans = beans;
+    }
+
+    public boolean substractBeans(int beans) {
+        if (beans <= this.beans) {
+            this.beans -= beans;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void addBeans(int beans) {
+        this.beans += beans;
+    }
+
+    public int getMoney() {
+        return money;
+    }
+
+    public void setMoney(int money) {
+        this.money = money;
+    }
+
+    public boolean substractMoney(int money) {
+        if (money <= this.money) {
+            this.money -= money;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void addMoney(int money) {
+        this.money += money;
+    }
+}
